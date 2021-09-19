@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 
 
-def prior(n_samples, prior_bounds):
+def prior(n_samples, prior_bounds, parameter_names):
     """
     Calculate prior distributions using with suitable lower and upper bounds for each parameters.
 
@@ -18,7 +18,6 @@ def prior(n_samples, prior_bounds):
     :return: ndarray of shape (n_samples, n_parameters)
         Sampled parameters from the prior
     """
-    parameter_names = [r'$\beta$', r'$\sigma$', r'$\gamma$', r'$\xi$', r'$\mu_I$']
     n_parameters = len(parameter_names)
 
     low = prior_bounds[0, :]
@@ -54,10 +53,10 @@ def version_prior(n_samples, version='v3'):
     if version == 'v1':
         parameter_names = ['beta', 'sigma', 'gamma', 'delta', 'rho']
         prior_bounds = np.array([[0.8, 0.25, 0.1, 0.01, 0.1], [2.25, 0.75, 1.0, 0.4, 0.6]])
-    elif version == 'v2':
+    if version == 'v2':
         parameter_names = ['beta', 'sigma', 'gamma', 'delta', 'eta']
         prior_bounds = np.array([[0.8, 0.25, 0.1, 0.01, 0.025], [2.25, 0.75, 1.0, 0.4, 0.45]])
-    elif version == 'v3':
+    if version == 'v3':
         parameter_names = ['beta', 'sigma', 'gamma', 'mu_I']
         prior_bounds = np.array([[0.8, 0.075, 0.01, 0.025], [2.25, 0.25, 0.4, 0.45]])
 
@@ -102,7 +101,7 @@ def version_data_model(parameters, t, initial_values, version='v3'):
             R.append(next_R)
             D.append(next_D)
 
-    elif version == 'v2':
+    if version == 'v2':
         beta, sigma, gamma, delta, eta = parameters
         for _ in t[1:]:
             next_S = S[-1] - ((beta * S[-1] * I[-1]) / N) * dt
@@ -117,7 +116,7 @@ def version_data_model(parameters, t, initial_values, version='v3'):
             R.append(next_R)
             D.append(next_D)
 
-    elif version == 'v3':
+    if version == 'v3':
         beta, sigma, gamma, mu_I = parameters
         for _ in t[1:]:
             next_S = S[-1] - ((beta * S[-1] * I[-1]) / N) * dt
@@ -135,7 +134,7 @@ def version_data_model(parameters, t, initial_values, version='v3'):
     return np.stack([S, E, I, R, D]).T
 
 
-def data_generator(n_samples, T=100, dt=1, N=1000, version='v3', to_tensor=True):
+def data_generator(n_samples, T=100, dt=1, N=1000, version='v3', to_tensor=False):
     """
 
     :param n_samples: int
