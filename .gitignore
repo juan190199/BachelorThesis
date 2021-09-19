@@ -1,0 +1,14 @@
+.idea/
+
+### Django ###
+*.log
+__pycache__/
+
+## macOS ##
+*.DS_Store
+
+## Jupyter Notebook ##
+*.ipynb_checkpoints
+
+## PDF ##
+*.pdf
