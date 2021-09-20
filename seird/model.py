@@ -81,7 +81,7 @@ def version_data_model(parameters, t, initial_values, version='v3'):
     """
     # SEIRD initial values
     S_0, E_0, I_0, R_0, D_0 = initial_values
-    N = S_0 + E_0, I_0, R_0, D_0
+    N = S_0 + E_0 + I_0 + R_0 + D_0
     S, E, I, R, D = [S_0], [E_0], [I_0], [R_0], [D_0]
 
     dt = t[1] - t[0]
@@ -163,7 +163,7 @@ def data_generator(n_samples, T=100, dt=1, N=1000, version='v3', to_tensor=False
     t = np.linspace(0, T, int(T / dt))
 
     # SEIRD initial values
-    initial_values = 1 - 1 / N, 1 / N, 0, 0, 0
+    initial_values = 1 - 1 / N, 1 / N, 0., 0., 0.
 
     # Sample parameters from the prior distributions.
     # The parameters are sampled from the prior distribution for each instance data model
