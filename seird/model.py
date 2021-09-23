@@ -45,14 +45,14 @@ def version_prior(n_samples, version='v3'):
         Number of samples to be drawn from the prior
 
     :param version: string
-        Version type
+        Version of the bachelor thesis
 
     :return: ndarray of shape (n_samples, n_parameters)
         Sampled parameters from the prior
     """
     if version == 'v1':
         parameter_names = ['beta', 'sigma', 'gamma', 'delta', 'rho']
-        prior_bounds = np.array([[0.8, 0.25, 0.1, 0.01, 0.1], [2.25, 0.75, 1.0, 0.4, 0.6]])
+        prior_bounds = np.array([[0.8, 0.45, 0.1, 0.01, 0.1], [2.25, 0.55, 1.0, 0.4, 0.6]])
     if version == 'v2':
         parameter_names = ['beta', 'sigma', 'gamma', 'delta', 'eta']
         prior_bounds = np.array([[0.8, 0.25, 0.1, 0.01, 0.025], [2.25, 0.75, 1.0, 0.4, 0.45]])
@@ -77,7 +77,11 @@ def version_data_model(parameters, t, initial_values, version='v3'):
     :param initial_values: ndarray of shape (5, )
         Initial values for SEIRD compartments
 
-    :return:
+    :param version: string, default='v3'
+        Version of the bachelor thesis
+
+    :return: ndarray of shape (tsteps, 5)
+        Tseries for each compartment
     """
     # SEIRD initial values
     S_0, E_0, I_0, R_0, D_0 = initial_values
