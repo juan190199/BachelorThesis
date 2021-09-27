@@ -95,9 +95,9 @@ def version_data_model(parameters, t, initial_values, version='v3'):
         for _ in t[1:]:
             next_S = S[-1] - ((beta * S[-1] * I[-1]) / N) * dt
             next_E = E[-1] + (beta * S[-1] * I[-1] / N - delta * E[-1]) * dt
-            next_I = I[-1] + (delta * E[-1] - (1 - sigma) * gamma * I[-1] - sigma * rho * I[-1]) * dt
-            next_R = R[-1] + ((1 - sigma) * gamma * I[-1]) * dt
-            next_D = D[-1] + sigma * rho * I[-1] * dt
+            next_I = I[-1] + (delta * E[-1] - (1 - gamma) * sigma * I[-1] - gamma * rho * I[-1]) * dt
+            next_R = R[-1] + ((1 - gamma) * sigma * I[-1]) * dt
+            next_D = D[-1] + gamma * rho * I[-1] * dt
 
             S.append(next_S)
             E.append(next_E)
@@ -110,8 +110,8 @@ def version_data_model(parameters, t, initial_values, version='v3'):
         for _ in t[1:]:
             next_S = S[-1] - ((beta * S[-1] * I[-1]) / N) * dt
             next_E = E[-1] + (beta * S[-1] * I[-1] / N - delta * E[-1]) * dt
-            next_I = I[-1] + (delta * E[-1] - (1 - sigma) * gamma * I[-1] - eta * I[-1]) * dt
-            next_R = R[-1] + ((1 - sigma) * gamma * I[-1]) * dt
+            next_I = I[-1] + (delta * E[-1] - (1 - gamma) * sigma * I[-1] - eta * I[-1]) * dt
+            next_R = R[-1] + ((1 - gamma) * sigma * I[-1]) * dt
             next_D = D[-1] + eta * I[-1] * dt
 
             S.append(next_S)
@@ -124,9 +124,9 @@ def version_data_model(parameters, t, initial_values, version='v3'):
         beta, sigma, gamma, mu_I = parameters
         for _ in t[1:]:
             next_S = S[-1] - ((beta * S[-1] * I[-1]) / N) * dt
-            next_E = E[-1] + (beta * S[-1] * I[-1] / N - gamma * E[-1]) * dt
-            next_I = I[-1] + (gamma * E[-1] - sigma * I[-1] - mu_I * I[-1]) * dt
-            next_R = R[-1] + (sigma * I[-1]) * dt
+            next_E = E[-1] + (beta * S[-1] * I[-1] / N - sigma * E[-1]) * dt
+            next_I = I[-1] + (sigma * E[-1] - gamma * I[-1] - mu_I * I[-1]) * dt
+            next_R = R[-1] + (gamma * I[-1]) * dt
             next_D = D[-1] + mu_I * I[-1] * dt
 
             S.append(next_S)
