@@ -97,15 +97,17 @@ def true_vs_estimated(model, X_test, theta_test, n_samples, param_names,
         # Label plot x-axis
         axarr[j].set_xlabel('Estimated')
 
-        if j == 0:
-            # Label plot
-            axarr[j].set_ylabel('True')
+        # Label plot
+        axarr[j].set_ylabel('True')
         axarr[j].set_title(param_names[j])
         axarr[j].spines['right'].set_visible(False)
         axarr[j].spines['top'].set_visible(False)
 
     # Adjust spaces
-    f.tight_layout()
+    f.tight_layout(rect=[0, 0.03, 1, 0.95])
+
+    # Plot title
+    f.suptitle("True vs Estimated")
 
     if show:
         plt.show()
