@@ -6,7 +6,7 @@ from itertools import combinations
 import matplotlib.pyplot as plt
 
 
-def true_vs_estimated(model, X_test, theta_test, n_samples, param_names,
+def true_vs_estimated(model, X_test, params_test, n_samples, param_names,
                           figsize=(20, 4), params_samples_mean=None, show=True, filename=None, font_size=12):
     """
     Scatter plot  of the estimated posterior means vs true values.
@@ -16,7 +16,7 @@ def true_vs_estimated(model, X_test, theta_test, n_samples, param_names,
     :param X_test: ndarray of shape (n_test, n_ts, n_compartments)
         Test data
 
-    :param theta_test: ndarray of shape (n_test, n_parameters)
+    :param params_test: ndarray of shape (n_test, n_parameters)
         Ground truth
 
     :param n_samples: int
@@ -67,7 +67,7 @@ def true_vs_estimated(model, X_test, theta_test, n_samples, param_names,
     # --- Plot true vs estimated posterior means on a single row --- #
     for j in range(len(param_names)):
         # Plot analytic vs estimated
-        axarr[j].scatter(params_samples_mean[:, j], theta_test[:, j], color='black', alpha=0.4)
+        axarr[j].scatter(params_samples_mean[:, j], params_test[:, j], color='black', alpha=0.4)
 
         # get axis limits and set equal x and y limits
         lower_lim = min(axarr[j].get_xlim()[0], axarr[j].get_ylim()[0])
@@ -78,8 +78,8 @@ def true_vs_estimated(model, X_test, theta_test, n_samples, param_names,
         axarr[j].plot(axarr[j].get_xlim(), axarr[j].get_xlim(), '--', color='black')
 
         # Compute NRMSE
-        rmse = np.sqrt(np.mean((params_samples_mean[:, j] - theta_test[:, j]) ** 2))
-        nrmse = rmse / (theta_test[:, j].max() - theta_test[:, j].min())
+        rmse = np.sqrt(np.mean((params_samples_mean[:, j] - params_test[:, j]) ** 2))
+        nrmse = rmse / (params_test[:, j].max() - params_test[:, j].min())
         axarr[j].text(0.1, 0.9, 'NRMSE={:.3f}'.format(nrmse),
                       horizontalalignment='left',
                       verticalalignment='center',
@@ -87,7 +87,7 @@ def true_vs_estimated(model, X_test, theta_test, n_samples, param_names,
                       size=10)
 
         # Compute R2
-        r2 = r2_score(theta_test[:, j], params_samples_mean[:, j])
+        r2 = r2_score(params_test[:, j], params_samples_mean[:, j])
         axarr[j].text(0.1, 0.8, '$R^2$={:.3f}'.format(r2),
                       horizontalalignment='left',
                       verticalalignment='center',
