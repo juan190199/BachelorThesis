@@ -56,7 +56,7 @@ def version_prior(n_samples, version='v3'):
     if version == 'v2':
         parameter_names = ['beta', 'sigma', 'gamma', 'delta', 'eta']
         prior_bounds = np.array([[0.8, 0.25, 0.1, 0.01, 0.025], [2.25, 0.75, 1.0, 0.4, 0.45]])
-    if version == 'v3':
+    if version == 'v3' or version == 'v4':
         parameter_names = ['beta', 'sigma', 'gamma', 'mu_I']
         prior_bounds = np.array([[0.8, 0.075, 0.01, 0.025], [2.25, 0.25, 0.4, 0.45]])
 
@@ -120,7 +120,7 @@ def version_data_model(parameters, t, initial_values, version='v3'):
             R.append(next_R)
             D.append(next_D)
 
-    if version == 'v3':
+    if version == 'v3' or version == 'v4':
         beta, sigma, gamma, mu_I = parameters
         for _ in t[1:]:
             next_S = S[-1] - ((beta * S[-1] * I[-1]) / N) * dt
@@ -138,7 +138,7 @@ def version_data_model(parameters, t, initial_values, version='v3'):
     return np.stack([S, E, I, R, D]).T
 
 
-def data_generator(n_samples, T=100, dt=1, N=1000, version='v3', to_tensor=False):
+def data_generator(n_samples, T=100, dt=1, N=1000, version='v4', to_tensor=False):
     """
 
     :param n_samples: int
@@ -190,7 +190,7 @@ def data_generator(n_samples, T=100, dt=1, N=1000, version='v3', to_tensor=False
     return {'params': params, 'X': X}
 
 
-def add_noise(tseries, type='plain', std=0.1, epsilon=1e-4):
+def add_noise(tseries, type='scaled', std=0.1, epsilon=1e-4):
     """
 
     :param tseries: np.ndarray of shape (n_tsteps, 5) or (n_instances, n_tsteps, 5)
