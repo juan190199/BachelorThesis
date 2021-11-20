@@ -124,7 +124,6 @@ def plot_parameters_correlation(parameters, parameter_names, figsize=(20, 10), s
     :param parameter_names:
     :param figsize:
     :param show:
-    :param filename:
     :param font_size:
     :return:
     """
@@ -155,6 +154,34 @@ def plot_parameters_correlation(parameters, parameter_names, figsize=(20, 10), s
 
     fig.suptitle('Parameter correlation', fontsize=20)
     # Adjust spaces
+    plt.tight_layout()
+
+    if show:
+        plt.figure(figsize=figsize)
+        plt.show()
+
+
+def plot_tseries(tseries, labels, figsize=(15, 10), show=True):
+    """
+
+    :param tseries:
+    :param labels:
+    :param figsize:
+    :return:
+    """
+    fig, ax = plt.subplots(1, 1, figsize=figsize)
+    for i in range(5):
+        ax.plot(tseries[1, :, i], label=labels[i], lw=2)
+
+    label_format = '{:,.0%}'
+    ticks_loc = ax.get_yticks().tolist()
+    ax.set_yticks(ticks_loc)
+    ax.set_yticklabels([label_format.format(x) for x in ticks_loc])
+
+    plt.title("Time Series")
+    plt.xlabel("time")
+    plt.ylabel("percent of population")
+    plt.legend()
     plt.tight_layout()
 
     if show:
