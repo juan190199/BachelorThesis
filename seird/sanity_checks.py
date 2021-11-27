@@ -64,40 +64,40 @@ def sampling_sc(*args, version='v4'):
         lower_bound = [0.8, 0.075, 0.01, 0.025]
         upper_bound = [2.25, 0.25, 0.4, 0.45]
 
-    if False:
-        params_samples = args[0]
+        # if False:
+        #     params_samples = args[0]
+        #
+        #     # Mask per parameter
+        #     mask = [
+        #         (params_samples[:, i] > lower_bound[i]) * (params_samples[:, i] < upper_bound[i])
+        #         for i in range(len(lower_bound))
+        #     ]
+        #     mask = np.array(mask).T
+        #
+        #     sc_paarams_samples = np.delete(params_samples, np.argwhere(mask == False)[:, 0], axis=0)
+        #     return sc_paarams_samples
 
-        # Mask per parameter
-        mask = [
-            (params_samples[:, i] > lower_bound[i]) * (params_samples[:, i] < upper_bound[i])
-            for i in range(len(lower_bound))
-        ]
-        mask = np.array(mask).T
-
-        sc_paarams_samples = np.delete(params_samples, np.argwhere(mask == False)[:, 0], axis=0)
-        return sc_paarams_samples
-
+        # else:
+    if len(args) == 2:
+        params_samples_mean, params_test = args
+        params_samples = None
+        X_test = None
     else:
-        if len(args) == 2:
-            params_samples_mean, params_test = args
-            params_samples = None
-            X_test = None
-        else:
-            params_samples_mean, params_test, params_samples, X_test = args
+        params_samples_mean, params_test, params_samples, X_test = args
 
         # Mask per parameter (Check if sampled parameters are bigger than lower bound and smaller than upper bound)
-        mask = [
-            (params_samples_mean[:, i] > lower_bound[i]) * (params_samples_mean[:, i] < upper_bound[i]) for i in
-            range(len(lower_bound))
-        ]
-        mask = np.array(mask).T
+    mask = [
+        (params_samples_mean[:, i] > lower_bound[i]) * (params_samples_mean[:, i] < upper_bound[i]) for i in
+        range(len(lower_bound))
+    ]
+    mask = np.array(mask).T
 
-        sc_params_samples_means = np.delete(params_samples_mean, np.argwhere(mask == False)[:, 0], axis=0)
-        sc_params_test = np.delete(params_test, np.argwhere(mask == False)[:, 0], axis=0)
+    sc_params_samples_means = np.delete(params_samples_mean, np.argwhere(mask == False)[:, 0], axis=0)
+    sc_params_test = np.delete(params_test, np.argwhere(mask == False)[:, 0], axis=0)
 
-        if params_samples is not None and X_test is not None:
-            sc_params_samples = np.delete(params_samples, np.argwhere(mask == False)[:, 0], axis=1)
-            sc_X_test = np.delete(X_test, np.argwhere(mask == False)[:, 0], axis=0)
+    if params_samples is not None and X_test is not None:
+        sc_params_samples = np.delete(params_samples, np.argwhere(mask == False)[:, 0], axis=1)
+        sc_X_test = np.delete(X_test, np.argwhere(mask == False)[:, 0], axis=0)
 
-            assert sc_X_test.shape[0] == sc_params_samples_means.shape[0]
-            return sc_params_samples_means, sc_params_test, sc_params_samples, sc_X_test
+        assert sc_X_test.shape[0] == sc_params_samples_means.shape[0]
+        return sc_params_samples_means, sc_params_test, sc_params_samples, sc_X_test
