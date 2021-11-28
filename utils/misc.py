@@ -247,5 +247,3 @@ def plot_posterior_predictive_comparison(X, tseries, labels, X_test=None, figsiz
     plt.tight_layout()
     if show:
         plt.show()
-
-
