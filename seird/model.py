@@ -59,6 +59,9 @@ def version_prior(n_samples, version='v3'):
     if version == 'v3' or version == 'v4':
         parameter_names = ['beta', 'sigma', 'gamma', 'mu_I']
         prior_bounds = np.array([[0.8, 0.075, 0.01, 0.025], [2.25, 0.25, 0.4, 0.45]])
+    if version == 'v5':
+        parameter_names = ['beta', 'sigma', 'gamma', 'mu_I', 'epsilon']
+        prior_bounds = np.array([[0.8, 0.075, 0.01, 0.025, 0.01], [2.25, 0.25, 0.4, 0.45, 0.17]])
 
     params = prior(n_samples, prior_bounds=prior_bounds, parameter_names=parameter_names)
     return params
@@ -120,7 +123,7 @@ def version_data_model(parameters, t, initial_values, version='v3'):
             R.append(next_R)
             D.append(next_D)
 
-    if version == 'v3' or version == 'v4':
+    if version == 'v3' or version == 'v4' or version == 'v5':
         beta, sigma, gamma, mu_I = parameters
         for _ in t[1:]:
             next_S = S[-1] - ((beta * S[-1] * I[-1]) / N) * dt
