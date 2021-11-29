@@ -82,8 +82,10 @@ def sampling_sc(*args, version='v4'):
         params_samples_mean, params_test = args
         params_samples = None
         X_test = None
-    else:
+    elif len(args) == 4:
         params_samples_mean, params_test, params_samples, X_test = args
+    elif len(args) == 5:
+        params_samples_mean, params_test, params_samples, noisy_X_test, X_test = args
 
         # Mask per parameter (Check if sampled parameters are bigger than lower bound and smaller than upper bound)
     mask = [
@@ -95,9 +97,17 @@ def sampling_sc(*args, version='v4'):
     sc_params_samples_means = np.delete(params_samples_mean, np.argwhere(mask == False)[:, 0], axis=0)
     sc_params_test = np.delete(params_test, np.argwhere(mask == False)[:, 0], axis=0)
 
-    if params_samples is not None and X_test is not None:
+    if len(args) == 4:
         sc_params_samples = np.delete(params_samples, np.argwhere(mask == False)[:, 0], axis=1)
         sc_X_test = np.delete(X_test, np.argwhere(mask == False)[:, 0], axis=0)
 
         assert sc_X_test.shape[0] == sc_params_samples_means.shape[0]
         return sc_params_samples_means, sc_params_test, sc_params_samples, sc_X_test
+
+    if len(args) == 5:
+        sc_params_samples = np.delete(params_samples, np.argwhere(mask == False)[:, 0], axis=1)
+        sc_noisy_X_test = np.delete(noisy_X_test, np.argwhere(mask == False)[:, 0], axis=0)
+        sc_X_test = np.delete(X_test, np.argwhere(mask == False)[:, 0], axis=0)
+
+        assert sc_X_test.shape[0] == sc_params_samples_means.shape[0]
+        return sc_params_samples_means, sc_params_test, sc_params_samples, sc_noisy_X_test, sc_X_test
