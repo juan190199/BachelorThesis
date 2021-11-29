@@ -123,8 +123,23 @@ def version_data_model(parameters, t, initial_values, version='v3'):
             R.append(next_R)
             D.append(next_D)
 
-    if version == 'v3' or version == 'v4' or version == 'v5':
+    if version == 'v3' or version == 'v4':
         beta, sigma, gamma, mu_I = parameters
+        for _ in t[1:]:
+            next_S = S[-1] - ((beta * S[-1] * I[-1]) / N) * dt
+            next_E = E[-1] + (beta * S[-1] * I[-1] / N - sigma * E[-1]) * dt
+            next_I = I[-1] + (sigma * E[-1] - gamma * I[-1] - mu_I * I[-1]) * dt
+            next_R = R[-1] + (gamma * I[-1]) * dt
+            next_D = D[-1] + mu_I * I[-1] * dt
+
+            S.append(next_S)
+            E.append(next_E)
+            I.append(next_I)
+            R.append(next_R)
+            D.append(next_D)
+
+    if version == 'v5':
+        beta, sigma, gamma, mu_I, _ = parameters
         for _ in t[1:]:
             next_S = S[-1] - ((beta * S[-1] * I[-1]) / N) * dt
             next_E = E[-1] + (beta * S[-1] * I[-1] / N - sigma * E[-1]) * dt
@@ -187,19 +202,29 @@ def data_generator(n_samples, T=100, dt=1, N=1000, version='v4', noise=False, ep
     )
 
     if noise:
-        for i in range(X.shape[0]):
-            noise = np.random.lognormal(mean=0, sigma=params[i, -1], size=X.shape[1:])
-            X[i] = X[i] * noise
+        noisy_X = X.copy()
+
+        for i in range(noisy_X.shape[0]):
+            noise = np.random.lognormal(mean=0, sigma=params[i, -1], size=noisy_X.shape[1:])
+            noisy_X[i] = noisy_X[i] * noise
 
         # Sanity checks
-        X[X < epsilon] = epsilon
-        X[X > 1] = 1 - epsilon
+        noisy_X[noisy_X < epsilon] = epsilon
+        noisy_X[noisy_X > 1] = 1 - epsilon
 
-    if to_tensor:
-        params = tf.convert_to_tensor(params, dtype=tf.float32)
-        X = tf.convert_to_tensor(X, dtype=tf.float32)
+        if to_tensor:
+            params = tf.convert_to_tensor(params, dtype=tf.float32)
+            X = tf.convert_to_tensor(X, dtype=tf.float32)
+            noisy_X = tf.convert_to_tensor(noisy_X, dtype=tf.float32)
 
-    return {'params': params, 'X': X}
+        return {'params': params, 'X': X, 'noisy_X': noisy_X}
+
+    else:
+        if to_tensor:
+            params = tf.convert_to_tensor(params, dtype=tf.float32)
+            X = tf.convert_to_tensor(X, dtype=tf.float32)
+
+        return {'params': params, 'X': X}
 
 
 
