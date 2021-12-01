@@ -171,7 +171,7 @@ def plot_tseries(tseries, labels, figsize=(15, 10), show=True):
     """
     fig, ax = plt.subplots(1, 1, figsize=figsize)
     for i in range(5):
-        ax.plot(tseries[1, :, i], label=labels[i], lw=2)
+        ax.plot(tseries[0, :, i], label=labels[i], lw=2)
 
     label_format = '{:,.0%}'
     ticks_loc = ax.get_yticks().tolist()
@@ -226,7 +226,7 @@ def plot_posterior_predictive_comparison(X, tseries, labels, X_test=None, figsiz
     media_tseries = np.median(tseries, axis=0)
 
     fig, ax = plt.subplots(3, int(len(labels) / 2), figsize=figsize)
-
+    ax[2, 1].remove()
     for i, ax in enumerate(ax.flat):
         for j in range(dif_percentiles.shape[0]):
             ax.fill_between(
