@@ -61,7 +61,7 @@ def version_prior(n_samples, version='v3'):
         prior_bounds = np.array([[0.8, 0.075, 0.01, 0.025], [2.25, 0.25, 0.4, 0.45]])
     if version == 'v5':
         parameter_names = ['beta', 'sigma', 'gamma', 'mu_I', 'epsilon']
-        prior_bounds = np.array([[0.8, 0.075, 0.01, 0.025, 0.01], [2.25, 0.25, 0.4, 0.45, 0.17]])
+        prior_bounds = np.array([[0.8, 0.075, 0.01, 0.025, 0.05], [2.25, 0.25, 0.4, 0.45, 0.1]])
 
     params = prior(n_samples, prior_bounds=prior_bounds, parameter_names=parameter_names)
     return params
@@ -156,7 +156,7 @@ def version_data_model(parameters, t, initial_values, version='v3'):
     return np.stack([S, E, I, R, D]).T
 
 
-def data_generator(n_samples, T=100, dt=1, N=1000, version='v4', noise=False, epsilon=1e-4, to_tensor=False):
+def data_generator(n_samples, T=100, dt=1, N=1000, version='v4', epsilon=1e-4, to_tensor=False):
     """
 
     :param n_samples: int
@@ -201,7 +201,7 @@ def data_generator(n_samples, T=100, dt=1, N=1000, version='v4', noise=False, ep
         version=version
     )
 
-    if noise:
+    if version == 'v5':
         noisy_X = X.copy()
 
         for i in range(noisy_X.shape[0]):
