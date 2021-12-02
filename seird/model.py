@@ -2,18 +2,6 @@ import numpy as np
 import tensorflow as tf
 
 
-"""
-Versions
-v1: Correlation between parameters
-v2: Correlation between parameters
-v3: Normal
-v4: Testing noisy data on model trained with non-noisy training data
-v5: Testing noisy input data on model trained with noisy input data
-v6: Dropping S tseries
-v7: Dropping S, E tseries
-"""
-
-
 def prior(n_samples, prior_bounds, parameter_names):
     """
     Calculate prior distributions using with suitable lower and upper bounds for each parameters.
@@ -150,7 +138,7 @@ def version_data_model(parameters, t, initial_values, version='v3'):
     return np.stack([S, E, I, R, D]).T
 
 
-def data_generator(n_samples, T=100, dt=1, N=1000, version='v4', noise=False, epsilon=1e-4, to_tensor=False):
+def data_generator(n_samples, T=100, dt=1, N=1000, version='v4', to_tensor=False):
     """
 
     :param n_samples: int
@@ -195,17 +183,47 @@ def data_generator(n_samples, T=100, dt=1, N=1000, version='v4', noise=False, ep
         version=version
     )
 
-    if noise:
-        for i in range(X.shape[0]):
-            noise = np.random.lognormal(mean=0, sigma=params[i, -1], size=X.shape[1:])
-            X[i] = X[i] * noise
-
-        # Sanity checks
-        X[X < epsilon] = epsilon
-        X[X > 1] = 1 - epsilon
-
     if to_tensor:
         params = tf.convert_to_tensor(params, dtype=tf.float32)
         X = tf.convert_to_tensor(X, dtype=tf.float32)
 
     return {'params': params, 'X': X}
+
+
+def add_noise(tseries, type='scaled', std=0.1, epsilon=1e-4):
+    """
+
+    :param tseries: np.ndarray of shape (n_tsteps, 5) or (n_instances, n_tsteps, 5)
+        SEIRD Model tseries
+
+    :param type: string
+        Type of noise:
+        - 'plain': plain additive noise
+        - 'scaled': scaled additive noise
+
+    :param std: float
+        Noise standard deviation
+
+    :param epsilon: float
+        Sanity check variable to numerical errors and maintain consistent model
+
+    :return: ndarray of shape (n_tsteps, 5) or (n_instances, ntsteps, 5)
+        Noisy SEIRD Model tseries
+    """
+    means = tseries.mean(axis=0)
+    std_matrix = np.sqrt(means)
+
+    if type == 'plain':
+        noise = np.random.normal(0, std, tseries.shape)
+        noisy_tseries = tseries + noise
+
+    if type == 'scaled':
+        normal_dist = np.random.normal(loc=0, scale=std, size=tseries.shape)
+        noise = np.multiply(std_matrix, normal_dist)
+        noisy_tseries = tseries + noise
+
+    # Sanity checks
+    noisy_tseries[noisy_tseries < epsilon] = epsilon
+    noisy_tseries[noisy_tseries > 1] = 1 - epsilon
+
+    return noisy_tseries
