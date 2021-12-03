@@ -160,7 +160,7 @@ def plot_parameters_correlation(parameters, parameter_names, figsize=(20, 10), s
         plt.show()
 
 
-def plot_tseries(tseries, labels, figsize=(15, 10), show=True):
+def plot_tseries(tseries, labels, figsize=(15, 10), font_size=10, show=True):
     """
 
     :param tseries:
@@ -169,9 +169,12 @@ def plot_tseries(tseries, labels, figsize=(15, 10), show=True):
     :param show:
     :return:
     """
+    plt.rcParams['font.size'] = font_size
+    colors = ['blue', 'darkorange', 'green', 'red', 'purple']
+
     fig, ax = plt.subplots(1, 1, figsize=figsize)
     for i in range(5):
-        ax.plot(tseries[0, :, i], label=labels[i], lw=2)
+        ax.plot(tseries[0, :, i], label=labels[i], color=colors[i], lw=1)
 
     label_format = '{:,.0%}'
     ticks_loc = ax.get_yticks().tolist()
@@ -193,7 +196,66 @@ def plot_true_vs_estimated_posterior():
     ...
 
 
-def plot_posterior_predictive_comparison(X, tseries, labels, X_test=None, figsize=(10, 10), font_size=11, show=True, special_ts=None):
+def plot_predictions(T, data, data_pred, cumulative=True, plot_quantiles=True, logscale=False,
+                     figsize=(36, 10), font_size=10, show=True):
+    """
+    Plot posterior predictive
+    :return:
+    """
+    plt.rcParams['font.size'] = font_size
+    colors = ['blue', 'darkorange', 'green', 'red', 'purple']
+
+    fig, ax = plt.subplots(1, 5, figsize=figsize)
+
+    if cumulative:
+        titles = ["Cumulative Susceptible", "Cumulative Exposed", "Cumulative Infected", "Cumulative Recovered",
+                  "Cumulative Dead"]
+    else:
+        data_pred = np.diff(data_pred, axis=1, prepend=np.expand_dims(data_pred[:, 0, :], axis=1))
+        titles = ["New Susceptible", "New Exposed", "New Infected", "New Recovered",
+                  "New Dead"]
+
+    median_tseries = np.median(data_pred, axis=0)
+
+    # Compute quantiles
+    qs_50 = np.quantile(data_pred, q=[0.25, 0.75], axis=0)
+    qs_90 = np.quantile(data_pred, q=[0.05, 0.95], axis=0)
+    qs_95 = np.quantile(data_pred, q=[0.025, 0.975], axis=0)
+
+    for i in range(5):
+        if cumulative:
+            ax[i].plot(data[:, i], marker='o', label='Reported cases', color='black', linestyle='dashed', alpha=0.8)
+        else:
+            ax[i].plot(np.diff(data[:, i], axis=0, prepend=data[0, i]), marker='o', label='Reported cases', color='black', linestyle='dashed', alpha=0.8)
+
+        # Plot median tseries
+        ax[i].plot(median_tseries[:, i], label="Median predicted cases", color=colors[i])
+
+        if plot_quantiles:
+            ax[i].fill_between(range(T), qs_50[0, :, i], qs_50[1, :, i], color=colors[i], alpha=0.3, label="50% CI")
+            ax[i].fill_between(range(T), qs_90[0, :, i], qs_90[1, :, i], color=colors[i], alpha=0.2, label="90% CI")
+            ax[i].fill_between(range(T), qs_95[0, :, i], qs_95[1, :, i], color=colors[i], alpha=0.1, label="95% CI")
+
+        ax[i].spines['right'].set_visible(False)
+        ax[i].set_title(titles[i], pad=0.2)
+        ax[i].spines['top'].set_visible(False)
+        ax[i].set_xlabel('Days')
+        ax[i].set_ylabel('Percent of population')
+        ax[i].legend(loc=1)
+        ax[i].set_ylim([0, np.max(qs_95[1, :, i]) * 1.25])
+        ax[i].set_xticks([6, 20, 34, 48, 62, 76, 90])
+        ax[i].grid(color='grey', linestyle='-', linewidth=0.25, alpha=0.5)
+
+        if logscale:
+            ax[i].set_yscale('log')
+
+    plt.tight_layout()
+    if show:
+        plt.show()
+
+
+def plot_posterior_predictive_comparison(X, tseries, labels, X_test=None, figsize=(10, 10), font_size=11, show=True,
+                                         special_ts=None):
     """
 
     :param X:
