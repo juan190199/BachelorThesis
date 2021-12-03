@@ -1,6 +1,8 @@
 import numpy as np
 import tensorflow as tf
 
+EPSILON = 1e-4
+
 
 def prior(n_samples, prior_bounds, parameter_names):
     """
@@ -38,7 +40,7 @@ def prior(n_samples, prior_bounds, parameter_names):
     return params
 
 
-def version_prior(n_samples, version='v3'):
+def version_prior(n_samples, version='v3', eps=None):
     """
 
     :param n_samples: int
@@ -62,6 +64,10 @@ def version_prior(n_samples, version='v3'):
     if version == 'v5':
         parameter_names = ['beta', 'sigma', 'gamma', 'mu_I', 'epsilon']
         prior_bounds = np.array([[0.8, 0.075, 0.01, 0.025, 0.05], [2.25, 0.25, 0.4, 0.45, 0.1]])
+
+    if version == 'exp':
+        parameter_names = ['beta', 'sigma', 'gamma', 'mu_I', 'epsilon']
+        prior_bounds = np.array([[0.8, 0.075, 0.01, 0.025, eps], [2.25, 0.25, 0.4, 0.45, eps]])
 
     params = prior(n_samples, prior_bounds=prior_bounds, parameter_names=parameter_names)
     return params
@@ -138,7 +144,7 @@ def version_data_model(parameters, t, initial_values, version='v3'):
             R.append(next_R)
             D.append(next_D)
 
-    if version == 'v5':
+    if version == 'v5' or version == 'exp':
         beta, sigma, gamma, mu_I, _ = parameters
         for _ in t[1:]:
             next_S = S[-1] - ((beta * S[-1] * I[-1]) / N) * dt
@@ -156,7 +162,7 @@ def version_data_model(parameters, t, initial_values, version='v3'):
     return np.stack([S, E, I, R, D]).T
 
 
-def data_generator(n_samples, T=100, dt=1, N=1000, version='v4', epsilon=1e-4, to_tensor=False):
+def data_generator(n_samples, T=100, dt=1, N=1000, version='v4', eps=None, to_tensor=False):
     """
 
     :param n_samples: int
@@ -189,7 +195,7 @@ def data_generator(n_samples, T=100, dt=1, N=1000, version='v4', epsilon=1e-4, t
 
     # Sample parameters from the prior distributions.
     # The parameters are sampled from the prior distribution for each instance data model
-    params = version_prior(n_samples=n_samples, version=version)
+    params = version_prior(n_samples=n_samples, version=version, eps=eps)
 
     # Generate tseries
     X = np.apply_along_axis(
@@ -201,7 +207,7 @@ def data_generator(n_samples, T=100, dt=1, N=1000, version='v4', epsilon=1e-4, t
         version=version
     )
 
-    if version == 'v5':
+    if version == 'v5' or version == 'exp':
         noisy_X = X.copy()
 
         for i in range(noisy_X.shape[0]):
@@ -209,8 +215,8 @@ def data_generator(n_samples, T=100, dt=1, N=1000, version='v4', epsilon=1e-4, t
             noisy_X[i] = noisy_X[i] * noise
 
         # Sanity checks
-        noisy_X[noisy_X < epsilon] = epsilon
-        noisy_X[noisy_X > 1] = 1 - epsilon
+        noisy_X[noisy_X < EPSILON] = EPSILON
+        noisy_X[noisy_X > 1] = 1 - EPSILON
 
         if to_tensor:
             params = tf.convert_to_tensor(params, dtype=tf.float32)
