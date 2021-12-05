@@ -58,13 +58,12 @@ def version_prior(n_samples, version='v3', eps=None):
     if version == 'v2':
         parameter_names = ['beta', 'sigma', 'gamma', 'delta', 'eta']
         prior_bounds = np.array([[0.8, 0.25, 0.1, 0.01, 0.025], [2.25, 0.75, 1.0, 0.4, 0.45]])
-    if version == 'v3' or version == 'v4':
+    if version == 'v3' or version == 'v4' or version == 'v6':
         parameter_names = ['beta', 'sigma', 'gamma', 'mu_I']
         prior_bounds = np.array([[0.8, 0.075, 0.01, 0.025], [2.25, 0.25, 0.4, 0.45]])
     if version == 'v5':
         parameter_names = ['beta', 'sigma', 'gamma', 'mu_I', 'epsilon']
         prior_bounds = np.array([[0.8, 0.075, 0.01, 0.025, 0.05], [2.25, 0.25, 0.4, 0.45, 0.1]])
-
     if version == 'exp':
         parameter_names = ['beta', 'sigma', 'gamma', 'mu_I', 'epsilon']
         prior_bounds = np.array([[0.8, 0.075, 0.01, 0.025, eps], [2.25, 0.25, 0.4, 0.45, eps]])
@@ -129,7 +128,7 @@ def version_data_model(parameters, t, initial_values, version='v3'):
             R.append(next_R)
             D.append(next_D)
 
-    if version == 'v3' or version == 'v4':
+    if version == 'v3' or version == 'v4' or version == 'v6':
         beta, sigma, gamma, mu_I = parameters
         for _ in t[1:]:
             next_S = S[-1] - ((beta * S[-1] * I[-1]) / N) * dt
@@ -162,7 +161,7 @@ def version_data_model(parameters, t, initial_values, version='v3'):
     return np.stack([S, E, I, R, D]).T
 
 
-def data_generator(n_samples, T=100, dt=1, N=1000, version='v4', eps=None, to_tensor=False):
+def data_generator(n_samples, T=100, dt=1, N=1000, version='v4', S=False, E=False, eps=None, to_tensor=False):
     """
 
     :param n_samples: int
@@ -224,6 +223,23 @@ def data_generator(n_samples, T=100, dt=1, N=1000, version='v4', eps=None, to_te
             noisy_X = tf.convert_to_tensor(noisy_X, dtype=tf.float32)
 
         return {'params': params, 'X': X, 'noisy_X': noisy_X}
+
+    elif version == 'v6':
+        if S and E:
+            # Drop S, E compartment tseries
+            dropped_X = X[:, :, 2:].copy()
+        elif E:
+            # Drop E compartment tseries
+            dropped_X = np.concatenate((X[:, :, :1], X[:, :, 2:]), axis=2)
+        elif S:
+            # Drop S compartment tseries
+            dropped_X = X[:, :, 1:].copy()
+
+        if to_tensor:
+            params = tf.convert_to_tensor(params, dtype=tf.float32)
+            X = tf.convert_to_tensor(X, dtype=tf.float32)
+
+        return {'params': params, 'X': X, 'dropped_X': dropped_X}
 
     else:
         if to_tensor:
