@@ -191,4 +191,5 @@ class BayesFlow(tf.keras.Model):
 
         if to_numpy:
             return theta_samples.numpy()
+
         return theta_samples
