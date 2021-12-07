@@ -40,7 +40,7 @@ def prior(n_samples, prior_bounds, parameter_names):
     return params
 
 
-def version_prior(n_samples, version='v3', eps=None):
+def version_prior(n_samples, version='v3'):
     """
 
     :param n_samples: int
@@ -64,9 +64,6 @@ def version_prior(n_samples, version='v3', eps=None):
     if version == 'v5':
         parameter_names = ['beta', 'sigma', 'gamma', 'mu_I', 'epsilon']
         prior_bounds = np.array([[0.8, 0.075, 0.01, 0.025, 0.05], [2.25, 0.25, 0.4, 0.45, 0.1]])
-    if version == 'exp':
-        parameter_names = ['beta', 'sigma', 'gamma', 'mu_I', 'epsilon']
-        prior_bounds = np.array([[0.8, 0.075, 0.01, 0.025, eps], [2.25, 0.25, 0.4, 0.45, eps]])
 
     params = prior(n_samples, prior_bounds=prior_bounds, parameter_names=parameter_names)
     return params
@@ -194,7 +191,7 @@ def data_generator(n_samples, T=100, dt=1, N=1000, version='v4', S=False, E=Fals
 
     # Sample parameters from the prior distributions.
     # The parameters are sampled from the prior distribution for each instance data model
-    params = version_prior(n_samples=n_samples, version=version, eps=eps)
+    params = version_prior(n_samples=n_samples, version=version)
 
     # Generate tseries
     X = np.apply_along_axis(
@@ -206,7 +203,7 @@ def data_generator(n_samples, T=100, dt=1, N=1000, version='v4', S=False, E=Fals
         version=version
     )
 
-    if version == 'v5' or version == 'exp':
+    if version == 'v5':
         noisy_X = X.copy()
 
         for i in range(noisy_X.shape[0]):
