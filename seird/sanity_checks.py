@@ -59,7 +59,7 @@ def sampling_sc(*args, version='v4'):
         parameter_names = ['beta', 'sigma', 'gamma', 'delta', 'eta']
         lower_bound = [0.8, 0.25, 0.1, 0.01, 0.025]
         upper_bound = [2.25, 0.75, 1.0, 0.4, 0.45]
-    if version == 'v3' or version == 'v4':
+    if version == 'v3' or version == 'v4' or version == 'v6':
         parameter_names = ['beta', 'sigma', 'gamma', 'mu_I']
         lower_bound = [0.8, 0.075, 0.01, 0.025]
         upper_bound = [2.25, 0.25, 0.4, 0.45]
@@ -94,7 +94,7 @@ def sampling_sc(*args, version='v4'):
         # Mask per parameter (Check if sampled parameters are bigger than lower bound and smaller than upper bound)
     mask = [
         (params_samples_mean[:, i] > lower_bound[i]) * (params_samples_mean[:, i] < upper_bound[i]) for i in
-        range(len(lower_bound))
+        range(params_samples_mean.shape[1])
     ]
     mask = np.array(mask).T
 
