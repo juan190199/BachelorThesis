@@ -63,10 +63,10 @@ def version_prior(n_samples, version='v3', low_epsilon=None, up_epsilon=None, le
         prior_bounds = np.array([[0.8, 0.075, 0.01, 0.025], [2.25, 0.25, 0.4, 0.45]])
     if version == 'v5':
         parameter_names = ['beta', 'sigma', 'gamma', 'mu_I', 'epsilon']
-        # if low_epsilon is not None and up_epsilon is not None:
-        #     prior_bounds = np.array([[0.8, 0.075, 0.01, 0.025, low_epsilon], [2.25, 0.25, 0.4, 0.45, up_epsilon]])
-        # else:
-        #     prior_bounds = np.array([[0.8, 0.075, 0.01, 0.025, 0.05], [2.25, 0.25, 0.4, 0.45, 0.15]])
+        if low_epsilon is not None and up_epsilon is not None:
+            prior_bounds = np.array([[0.8, 0.075, 0.01, 0.025, low_epsilon], [2.25, 0.25, 0.4, 0.45, up_epsilon]])
+        else:
+            prior_bounds = np.array([[0.8, 0.075, 0.01, 0.025, 0.05], [2.25, 0.25, 0.4, 0.45, 0.15]])
 
     params = prior(n_samples, prior_bounds=prior_bounds, parameter_names=parameter_names)
 
