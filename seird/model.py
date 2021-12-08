@@ -40,7 +40,7 @@ def prior(n_samples, prior_bounds, parameter_names):
     return params
 
 
-def version_prior(n_samples, version='v3', low_epsilon=None, up_epsilon=None):
+def version_prior(n_samples, version='v3', low_epsilon=None, up_epsilon=None, learning_noise=False):
     """
 
     :param n_samples: int
@@ -63,13 +63,20 @@ def version_prior(n_samples, version='v3', low_epsilon=None, up_epsilon=None):
         prior_bounds = np.array([[0.8, 0.075, 0.01, 0.025], [2.25, 0.25, 0.4, 0.45]])
     if version == 'v5':
         parameter_names = ['beta', 'sigma', 'gamma', 'mu_I', 'epsilon']
-        prior_bounds = np.array([[0.8, 0.075, 0.01, 0.025, low_epsilon], [2.25, 0.25, 0.4, 0.45, up_epsilon]])
+        # if low_epsilon is not None and up_epsilon is not None:
+        #     prior_bounds = np.array([[0.8, 0.075, 0.01, 0.025, low_epsilon], [2.25, 0.25, 0.4, 0.45, up_epsilon]])
+        # else:
+        #     prior_bounds = np.array([[0.8, 0.075, 0.01, 0.025, 0.05], [2.25, 0.25, 0.4, 0.45, 0.15]])
 
     params = prior(n_samples, prior_bounds=prior_bounds, parameter_names=parameter_names)
-    return params
+
+    if learning_noise:
+        return params
+    else:
+        return params[:, :-1]
 
 
-def version_data_model(parameters, t, initial_values, version='v3'):
+def version_data_model(parameters, t, initial_values, version='v3', learning_noise=False):
     """
     System of differential equations for SEIRD Model simulation
 
@@ -141,7 +148,11 @@ def version_data_model(parameters, t, initial_values, version='v3'):
             D.append(next_D)
 
     if version == 'v5':
-        beta, sigma, gamma, mu_I, _ = parameters
+        if learning_noise:
+            beta, sigma, gamma, mu_I, epsilon = parameters
+        else:
+            beta, sigma, gamma, mu_I = parameters
+
         for _ in t[1:]:
             next_S = S[-1] - ((beta * S[-1] * I[-1]) / N) * dt
             next_E = E[-1] + (beta * S[-1] * I[-1] / N - sigma * E[-1]) * dt
@@ -158,7 +169,7 @@ def version_data_model(parameters, t, initial_values, version='v3'):
     return np.stack([S, E, I, R, D]).T
 
 
-def data_generator(n_samples, T=100, dt=1, N=1000, version='v4', S=False, E=False, low_eps=None, up_eps=None, to_tensor=False):
+def data_generator(n_samples, T=100, dt=1, N=1000, version='v4', S=False, E=False, low_epsilon=None, up_epsilon=None, learning_noise=False, to_tensor=False):
     """
 
     :param n_samples: int
@@ -191,7 +202,7 @@ def data_generator(n_samples, T=100, dt=1, N=1000, version='v4', S=False, E=Fals
 
     # Sample parameters from the prior distributions.
     # The parameters are sampled from the prior distribution for each instance data model
-    params = version_prior(n_samples=n_samples, version=version, low_eps=low_eps, up_eps=up_eps)
+    params = version_prior(n_samples=n_samples, version=version, low_epsilon=low_epsilon, up_epsilon=up_epsilon, learning_noise=learning_noise)
 
     # Generate tseries
     X = np.apply_along_axis(
@@ -200,7 +211,8 @@ def data_generator(n_samples, T=100, dt=1, N=1000, version='v4', S=False, E=Fals
         arr=params,
         t=t,
         initial_values=initial_values,
-        version=version
+        version=version,
+        learning_noise=learning_noise
     )
 
     if version == 'v5':
