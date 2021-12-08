@@ -66,7 +66,7 @@ def sampling_sc(*args, version='v4'):
     if version == 'v5':
         parameter_names = ['beta', 'sigma', 'gamma', 'mu_I', 'epsilon']
         lower_bound = [0.8, 0.075, 0.01, 0.025, 0.05]
-        upper_bound = [2.25, 0.25, 0.4, 0.45, 0.1]
+        upper_bound = [2.25, 0.25, 0.4, 0.45, 0.15]
 
         # if False:
         #     params_samples = args[0]
