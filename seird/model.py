@@ -55,12 +55,24 @@ def version_prior(n_samples, version='v3', low_epsilon=None, up_epsilon=None, le
     if version == 'v1':
         parameter_names = ['beta', 'sigma', 'gamma', 'delta', 'rho']
         prior_bounds = np.array([[0.8, 0.45, 0.1, 0.01, 0.1], [2.25, 0.55, 1.0, 0.4, 0.6]])
+
+        params = prior(n_samples, prior_bounds=prior_bounds, parameter_names=parameter_names)
+        return params
+
     if version == 'v2':
         parameter_names = ['beta', 'sigma', 'gamma', 'delta', 'eta']
         prior_bounds = np.array([[0.8, 0.25, 0.1, 0.01, 0.025], [2.25, 0.75, 1.0, 0.4, 0.45]])
+
+        params = prior(n_samples, prior_bounds=prior_bounds, parameter_names=parameter_names)
+        return params
+
     if version == 'v3' or version == 'v4' or version == 'v6':
         parameter_names = ['beta', 'sigma', 'gamma', 'mu_I']
         prior_bounds = np.array([[0.8, 0.075, 0.01, 0.025], [2.25, 0.25, 0.4, 0.45]])
+
+        params = prior(n_samples, prior_bounds=prior_bounds, parameter_names=parameter_names)
+        return params
+
     if version == 'v5':
         parameter_names = ['beta', 'sigma', 'gamma', 'mu_I', 'epsilon']
         if low_epsilon is not None and up_epsilon is not None:
@@ -68,12 +80,12 @@ def version_prior(n_samples, version='v3', low_epsilon=None, up_epsilon=None, le
         else:
             prior_bounds = np.array([[0.8, 0.075, 0.01, 0.025, 0.05], [2.25, 0.25, 0.4, 0.45, 0.15]])
 
-    params = prior(n_samples, prior_bounds=prior_bounds, parameter_names=parameter_names)
+        params = prior(n_samples, prior_bounds=prior_bounds, parameter_names=parameter_names)
 
-    if learning_noise:
-        return params
-    else:
-        return params[:, :-1]
+        if learning_noise:
+            return params
+        else:
+            return params[:, :-1]
 
 
 def version_data_model(parameters, t, initial_values, version='v3', learning_noise=False):
