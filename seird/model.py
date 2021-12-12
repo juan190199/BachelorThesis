@@ -144,22 +144,7 @@ def version_data_model(parameters, t, initial_values, version='v3', learning_noi
             R.append(next_R)
             D.append(next_D)
 
-    if version == 'v3' or version == 'v4' or version == 'v6':
-        beta, sigma, gamma, mu_I = parameters
-        for _ in t[1:]:
-            next_S = S[-1] - ((beta * S[-1] * I[-1]) / N) * dt
-            next_E = E[-1] + (beta * S[-1] * I[-1] / N - sigma * E[-1]) * dt
-            next_I = I[-1] + (sigma * E[-1] - gamma * I[-1] - mu_I * I[-1]) * dt
-            next_R = R[-1] + (gamma * I[-1]) * dt
-            next_D = D[-1] + mu_I * I[-1] * dt
-
-            S.append(next_S)
-            E.append(next_E)
-            I.append(next_I)
-            R.append(next_R)
-            D.append(next_D)
-
-    if version == 'v5':
+    if version == 'v3' or version == 'v4' or version == 'v5' or version == 'v6':
         if learning_noise:
             beta, sigma, gamma, mu_I, epsilon = parameters
         else:
@@ -177,8 +162,6 @@ def version_data_model(parameters, t, initial_values, version='v3', learning_noi
             I.append(next_I)
             R.append(next_R)
             D.append(next_D)
-
-    return np.stack([S, E, I, R, D]).T
 
 
 def data_generator(n_samples, T=100, dt=1, N=1000, version='v4', S=False, E=False, low_epsilon=None, up_epsilon=None, learning_noise=False, to_tensor=False):
