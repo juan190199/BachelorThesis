@@ -115,7 +115,7 @@ def true_vs_estimated(model, X_test, params_test, n_samples, param_names,
         f.savefig("figures/{}.png".format(filename), dpi=600)
 
 
-def plot_parameters_correlation(parameters, parameter_names, figsize=(20, 10), show=True, filename=False, font_size=11):
+def plot_parameters_correlation(parameters, parameter_names, figsize=(20, 10), show=True, filename=False, font_size=12):
     """
 
     :param parameters:
@@ -164,7 +164,7 @@ def plot_parameters_correlation(parameters, parameter_names, figsize=(20, 10), s
         fig.savefig("figures/{}.png".format(filename), dpi=600)
 
 
-def plot_tseries(tseries, labels, figsize=(15, 10), font_size=10, show=True):
+def plot_tseries(tseries, labels, figsize=(15, 10), font_size=12, show=True):
     """
 
     :param tseries:
@@ -196,12 +196,8 @@ def plot_tseries(tseries, labels, figsize=(15, 10), font_size=10, show=True):
         plt.show()
 
 
-def plot_true_vs_estimated_posterior():
-    ...
-
-
 def plot_predictions(T, data, data_pred, cumulative=True, plot_quantiles=True, logscale=False,
-                     figsize=(36, 10), font_size=10, show=True):
+                     figsize=(35, 10), font_size=20, show=True, filename=False):
     """
     Plot posterior predictive
     :return:
@@ -241,11 +237,18 @@ def plot_predictions(T, data, data_pred, cumulative=True, plot_quantiles=True, l
             ax[i].fill_between(range(T), qs_95[0, :, i], qs_95[1, :, i], color=colors[i], alpha=0.1, label="95% CI")
 
         ax[i].spines['right'].set_visible(False)
-        ax[i].set_title(titles[i], pad=0.2)
+        ax[i].set_title(titles[i], pad=0.2, fontdict={'fontsize': font_size})
         ax[i].spines['top'].set_visible(False)
         ax[i].set_xlabel('Days')
         ax[i].set_ylabel('Percent of population')
-        ax[i].legend(loc=1)
+
+        if i == 0:
+            ax[i].legend(loc=1, fontsize=font_size)
+        elif i == 1 or i == 2:
+            ax[i].legend(loc=0, fontsize=font_size)
+        elif i == 3 or i == 4:
+            ax[i].legend(loc=4, fontsize=font_size)
+
         ax[i].set_ylim([0, np.max(qs_95[1, :, i]) * 1.25])
         ax[i].set_xticks([6, 20, 34, 48, 62, 76, 90])
         ax[i].grid(color='grey', linestyle='-', linewidth=0.25, alpha=0.5)
@@ -253,6 +256,12 @@ def plot_predictions(T, data, data_pred, cumulative=True, plot_quantiles=True, l
         if logscale:
             ax[i].set_yscale('log')
 
+    fig.suptitle('Forecasts')
     plt.tight_layout()
+
     if show:
         plt.show()
+
+    # Save if specified
+    if filename is not None:
+        fig.savefig("figures/{}.png".format(filename), dpi=600)
