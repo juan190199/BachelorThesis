@@ -83,28 +83,28 @@ def version_prior(n_samples, version='v2', low_epsilon=None, up_epsilon=None):
         params = prior(n_samples, prior_bounds=prior_bounds, parameter_names=parameter_names)
         return params
 
-    # if version in ['v6']:
-    #     parameter_names = [
-    #         'beta', 'sigma', 'gamma', 'xi', 'mu_I',
-    #         'beta_Q', 'sigma_Q', 'gamma_Q', 'mu_Q',
-    #         'theta_E', 'theta_I', 'psi_E', 'psi_I',
-    #         'nu', 'mu_0', 'q'
-    #     ]
-    #     prior_bounds = np.array(
-    #         [
-    #             [0.3, 0.075, 0.025, 0.0005, 0.025,
-    #              0.15, 0.075, 0.025, 0.025,
-    #              0.01, 0.01, 1.0, 1.0,
-    #              0.0, 0.0, 0.0],
-    #             [1.0, 0.35, 0.075, 0.015, 0.075,
-    #              0.5, 0.35, 0.075, 0.075,
-    #              0.07, 0.07, 1.0, 1.0,
-    #              0.0, 0.0, 0.0]
-    #         ]
-    #     )
-    #
-    #     params = prior(n_samples, prior_bounds=prior_bounds, parameter_names=parameter_names)
-    #     return params
+    if version in ['v6']:
+        parameter_names = [
+            'beta', 'sigma', 'gamma', 'xi', 'mu_I',
+            'beta_Q', 'sigma_Q', 'gamma_Q', 'mu_Q',
+            'theta_E', 'theta_I', 'psi_E', 'psi_I',
+            'nu', 'mu_0', 'q'
+        ]
+        prior_bounds = np.array(
+            [
+                [0.3, 0.075, 0.025, 0.0005, 0.025,
+                 0.15, 0.075, 0.025, 0.025,
+                 0.01, 0.01, 1.0, 1.0,
+                 0.0, 0.0, 0.0],
+                [1.0, 0.35, 0.075, 0.015, 0.075,
+                 0.5, 0.35, 0.075, 0.075,
+                 0.07, 0.07, 1.0, 1.0,
+                 0.0, 0.0, 0.0]
+            ]
+        )
+
+        params = prior(n_samples, prior_bounds=prior_bounds, parameter_names=parameter_names)
+        return params
 
 
 def version_data_model(parameters, t, initial_values, version='v2', learning_noise=False):
@@ -133,10 +133,10 @@ def version_data_model(parameters, t, initial_values, version='v2', learning_noi
         N = S_0 + E_0 + I_0 + R_0 + D_0
         S, E, I, R, D = [S_0], [E_0], [I_0], [R_0], [D_0]
 
-    # elif version in ['v6']:
-    #     S_0, E_0, I_0, R_0, D_0, Q_E_0, Q_I_0 = initial_values
-    #     N = S_0 + E_0 + I_0 + R_0 + D_0 + Q_E_0 + Q_I_0
-    #     S, E, I, R, D, Q_E, Q_I = [S_0], [E_0], [I_0], [R_0], [D_0], [Q_E_0], [Q_I_0]
+    elif version in ['v6']:
+        S_0, E_0, I_0, R_0, D_0, Q_E_0, Q_I_0 = initial_values
+        N = S_0 + E_0 + I_0 + R_0 + D_0 + Q_E_0 + Q_I_0
+        S, E, I, R, D, Q_E, Q_I = [S_0], [E_0], [I_0], [R_0], [D_0], [Q_E_0], [Q_I_0]
 
     dt = t[1] - t[0]
 
@@ -203,26 +203,26 @@ def version_data_model(parameters, t, initial_values, version='v2', learning_noi
             R.append(next_R)
             D.append(next_D)
 
-    # if version in ['v6']:
-    #     beta, sigma, gamma, xi, mu_I, beta_Q, sigma_Q, gamma_Q, mu_Q, theta_E, theta_I, psi_E, psi_I, nu, mu_0, q = parameters
-    #     for _ in t[1:]:
-    #         next_S = S[-1] - ((beta * S[-1] * I[-1] / N) - (q * beta_Q * S[-1] * Q_I[-1] / N) + xi * R[-1] + nu * N - mu_0 * S[-1]) * dt
-    #         next_E = E[-1] + ((beta * S[-1] * I[-1] / N) + (1 * beta_Q * S[-1] * Q_I[-1] / N) - sigma * E[-1] - theta_E * psi_E * E[-1] - mu_0 * E[-1]) * dt
-    #         next_I = I[-1] + (sigma * E[-1] - gamma * I[-1] - mu_I * I[-1] - theta_I * psi_I * I[-1] - mu_0 * I[-1]) * dt
-    #         next_Q_E = Q_E[-1] + (theta_E * psi_E * E[-1] - sigma_Q * Q_E[-1] - mu_0 * Q_E[-1]) * dt
-    #         next_Q_I = Q_I[-1] + (theta_I * psi_I * E[-1] + sigma_Q * Q_E[-1] - gamma_Q * Q_I[-1] - mu_Q * Q_I[-1] - mu_0 * Q_I[-1]) * dt
-    #         next_R = R[-1] + (gamma * I[-1] + gamma_Q * Q_I[-1] - xi * R[-1] - mu_0 * R[-1]) * dt
-    #         next_D = D[-1] + (mu_I * I[-1] + mu_Q * Q_I[-1]) * dt
-    #
-    #         S.append(next_S)
-    #         E.append(next_E)
-    #         I.append(next_I)
-    #         Q_E.append(next_Q_E)
-    #         Q_I.append(next_Q_I)
-    #         R.append(next_R)
-    #         D.append(next_D)
-    #
-    # return np.stack([S, E, I, R, D, Q_E, Q_I]).T
+    if version in ['v6']:
+        beta, sigma, gamma, xi, mu_I, beta_Q, sigma_Q, gamma_Q, mu_Q, theta_E, theta_I, psi_E, psi_I, nu, mu_0, q = parameters
+        for _ in t[1:]:
+            next_S = S[-1] - ((beta * S[-1] * I[-1] / N) - (q * beta_Q * S[-1] * Q_I[-1] / N) + xi * R[-1] + nu * N - mu_0 * S[-1]) * dt
+            next_E = E[-1] + ((beta * S[-1] * I[-1] / N) + (1 * beta_Q * S[-1] * Q_I[-1] / N) - sigma * E[-1] - theta_E * psi_E * E[-1] - mu_0 * E[-1]) * dt
+            next_I = I[-1] + (sigma * E[-1] - gamma * I[-1] - mu_I * I[-1] - theta_I * psi_I * I[-1] - mu_0 * I[-1]) * dt
+            next_Q_E = Q_E[-1] + (theta_E * psi_E * E[-1] - sigma_Q * Q_E[-1] - mu_0 * Q_E[-1]) * dt
+            next_Q_I = Q_I[-1] + (theta_I * psi_I * E[-1] + sigma_Q * Q_E[-1] - gamma_Q * Q_I[-1] - mu_Q * Q_I[-1] - mu_0 * Q_I[-1]) * dt
+            next_R = R[-1] + (gamma * I[-1] + gamma_Q * Q_I[-1] - xi * R[-1] - mu_0 * R[-1]) * dt
+            next_D = D[-1] + (mu_I * I[-1] + mu_Q * Q_I[-1]) * dt
+
+            S.append(next_S)
+            E.append(next_E)
+            I.append(next_I)
+            Q_E.append(next_Q_E)
+            Q_I.append(next_Q_I)
+            R.append(next_R)
+            D.append(next_D)
+
+    return np.stack([S, E, I, R, D, Q_E, Q_I]).T
 
 
 def data_generator(n_samples, T=100, dt=1, N=1000, version='v2', S=False, E=False, low_epsilon=None, up_epsilon=None, learning_noise=False, to_tensor=False):
@@ -256,8 +256,8 @@ def data_generator(n_samples, T=100, dt=1, N=1000, version='v2', S=False, E=Fals
     # SEIRD initial values
     if version in ['v1', 'v1_1', 'v2', 'v3', 'v4', 'v5', 'v5_2']:
         initial_values = 1 - 1 / N, 1 / N, 0., 0., 0.
-    # elif version in ['v6']:
-    #     initial_values = 1 - 1 / N, 1 / N, 0., 0., 0., 0., 0.
+    elif version in ['v6']:
+        initial_values = 1 - 1 / N, 1 / N, 0., 0., 0., 0., 0.
 
     # Sample parameters from the prior distributions.
     # The parameters are sampled from the prior distribution for each instance data model
@@ -313,29 +313,29 @@ def data_generator(n_samples, T=100, dt=1, N=1000, version='v2', S=False, E=Fals
 
         return {'params': params, 'X': X, 'dropped_X': dropped_X}
 
-    # elif version in ['v5_2']:
-    #     noisy_X = X.copy()
-    #
-    #     for i in range(noisy_X.shape[0]):
-    #         noise = np.random.lognormal(mean=0, sigma=params[i, -1], size=noisy_X.shape[1:])
-    #         noisy_X[i] = noisy_X[i] * noise
-    #
-    #     # Sanity checks
-    #     noisy_X[noisy_X < EPSILON] = EPSILON
-    #     noisy_X[noisy_X > 1] = 1 - EPSILON
-    #
-    #     if not learning_noise:
-    #         params = params[:, :-1].copy()
-    #
-    #     # Drop tseries
-    #     noisy_dropped_X = noisy_X[:, :, 2:].copy()
-    #
-    #     if to_tensor:
-    #         params = tf.convert_to_tensor(params, dtype=tf.float32)
-    #         noisy_dropped_X = tf.convert_to_tensor(noisy_dropped_X, dtype=tf.float32)
-    #         X = tf.convert_to_tensor(X, dtype=tf.float32)
-    #
-    #     return {'params': params, 'X': X, 'noisy_X': noisy_X, 'noisy_dropped_X': noisy_dropped_X}
+    elif version in ['v5_2']:
+        noisy_X = X.copy()
+
+        for i in range(noisy_X.shape[0]):
+            noise = np.random.lognormal(mean=0, sigma=params[i, -1], size=noisy_X.shape[1:])
+            noisy_X[i] = noisy_X[i] * noise
+
+        # Sanity checks
+        noisy_X[noisy_X < EPSILON] = EPSILON
+        noisy_X[noisy_X > 1] = 1 - EPSILON
+
+        if not learning_noise:
+            params = params[:, :-1].copy()
+
+        # Drop tseries
+        noisy_dropped_X = noisy_X[:, :, 2:].copy()
+
+        if to_tensor:
+            params = tf.convert_to_tensor(params, dtype=tf.float32)
+            noisy_dropped_X = tf.convert_to_tensor(noisy_dropped_X, dtype=tf.float32)
+            X = tf.convert_to_tensor(X, dtype=tf.float32)
+
+        return {'params': params, 'X': X, 'noisy_X': noisy_X, 'noisy_dropped_X': noisy_dropped_X}
 
     elif version in ['v1', 'v1_1', 'v2', 'v3', 'v6']:
         if to_tensor:
