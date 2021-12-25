@@ -58,8 +58,8 @@ def sampling_sc(*args, version='v4', learning_noise=False):
         params_samples_mean, params_test, params_samples, X_test = args
     elif len(args) == 5:
         params_samples_mean, params_test, params_samples, noisy_X_test, X_test = args
-    # elif len(args) == 6:
-    #     params_samples_mean, params_test, params_samples, noisy_dropped_X_test, X_test, noisy_X_test = args
+    elif len(args) == 6:
+        params_samples_mean, params_test, params_samples, noisy_dropped_X_test, X_test, noisy_X_test = args
 
         # Mask per parameter (Check if sampled parameters are bigger than lower bound and smaller than upper bound)
     mask = [
@@ -86,11 +86,11 @@ def sampling_sc(*args, version='v4', learning_noise=False):
         assert sc_X_test.shape[0] == sc_params_samples_means.shape[0]
         return sc_params_samples_means, sc_params_test, sc_params_samples, sc_noisy_X_test, sc_X_test
 
-    # if len(args) == 6:
-    #     sc_params_samples = np.delete(params_samples, np.argwhere(mask == False)[:, 0], axis=1)
-    #     sc_noisy_dropped_X_test = np.delete(noisy_dropped_X_test, np.argwhere(mask == False)[:, 0], axis=0)
-    #     sc_X_test = np.delete(X_test, np.argwhere(mask == False)[:, 0], axis=0)
-    #     sc_noisy_X_test = np.delete(noisy_X_test, np.argwhere(mask == False)[:, 0], axis=0)
-    #
-    #     assert sc_X_test.shape[0] == sc_params_samples_means.shape[0]
-    #     return sc_params_samples_means, sc_params_test, sc_params_samples, sc_noisy_dropped_X_test, sc_X_test, sc_noisy_X_test
+    if len(args) == 6:
+        sc_params_samples = np.delete(params_samples, np.argwhere(mask == False)[:, 0], axis=1)
+        sc_noisy_dropped_X_test = np.delete(noisy_dropped_X_test, np.argwhere(mask == False)[:, 0], axis=0)
+        sc_X_test = np.delete(X_test, np.argwhere(mask == False)[:, 0], axis=0)
+        sc_noisy_X_test = np.delete(noisy_X_test, np.argwhere(mask == False)[:, 0], axis=0)
+
+        assert sc_X_test.shape[0] == sc_params_samples_means.shape[0]
+        return sc_params_samples_means, sc_params_test, sc_params_samples, sc_noisy_dropped_X_test, sc_X_test, sc_noisy_X_test
