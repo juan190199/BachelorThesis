@@ -4,10 +4,11 @@ from sklearn.metrics import r2_score
 from itertools import combinations
 
 import matplotlib.pyplot as plt
+from matplotlib import cm
 
 
 def true_vs_estimated(model, X_test, params_test, n_samples, param_names,
-                          figsize=(20, 4), params_samples_mean=None, show=True, filename=None, font_size=12):
+                      figsize=(20, 4), params_samples_mean=None, show=True, filename=None, font_size=12):
     """
     Scatter plot  of the estimated posterior means vs true values.
 
@@ -43,9 +44,6 @@ def true_vs_estimated(model, X_test, params_test, n_samples, param_names,
 
     # Plot settings
     plt.rcParams['font.size'] = font_size
-
-    # Convert true parameters to numpy
-    # theta_test = theta_test.numpy()
 
     # Determine figure layout
     if len(param_names) >= 6:
@@ -148,7 +146,8 @@ def plot_parameters_correlation(parameters, parameter_names, figsize=(20, 10), s
         ax[0, idx].set_xlabel(comp_param_names[idx][0], fontsize=15)
         ax[0, idx].set_ylabel(comp_param_names[idx][1], fontsize=15)
 
-        ax[1, idx].scatter(comp_params[int(len(comp_list) / 2) + idx][:, 0], comp_params[int(len(comp_list) / 2) + idx][:, 1], color='black', alpha=0.4)
+        ax[1, idx].scatter(comp_params[int(len(comp_list) / 2) + idx][:, 0],
+                           comp_params[int(len(comp_list) / 2) + idx][:, 1], color='black', alpha=0.4)
         ax[1, idx].set_xlabel(comp_param_names[idx + int(len(comp_list) / 2)][0], fontsize=15)
         ax[1, idx].set_ylabel(comp_param_names[idx + int(len(comp_list) / 2)][1], fontsize=15)
 
@@ -167,6 +166,7 @@ def plot_tseries(tseries, labels, figsize=(15, 10), show=True):
     :param tseries:
     :param labels:
     :param figsize:
+    :param show:
     :return:
     """
     fig, ax = plt.subplots(1, 1, figsize=figsize)
@@ -187,3 +187,65 @@ def plot_tseries(tseries, labels, figsize=(15, 10), show=True):
     if show:
         plt.figure(figsize=figsize)
         plt.show()
+
+
+def plot_true_vs_estimated_posterior():
+    ...
+
+
+def plot_posterior_predictive_comparison(X, tseries, labels, X_test=None, figsize=(10, 10), font_size=11, show=True, special_ts=None):
+    """
+
+    :param X:
+    :param tseries:
+    :param labels:
+    :param X_test:
+    :param ps:
+    :param cmedian:
+    :param figsize:
+    :param font_size:
+    :param special_ts:
+    :return:
+    """
+    plt.rcParams['font.size'] = font_size
+
+    # Confidence intervals
+    ci = [95, 90, 50]
+    # Percentiles for the ci
+    percentiles = [50, 10, 5]
+
+    dif_percentiles = np.asarray(percentiles) / 2  # [25, 5, 2.5]
+    upper_percentiles = 50 + dif_percentiles
+    lower_percentiles = 50 - dif_percentiles
+
+    upper_percentile = np.percentile(tseries, q=upper_percentiles, axis=0)  # (3, 100, 5)
+    lower_percentile = np.percentile(tseries, q=lower_percentiles, axis=0)  # (3, 100, 5)
+
+    alphas = [0.1, 0.2, 0.3]  # Color intensities for different ci
+
+    media_tseries = np.median(tseries, axis=0)
+
+    fig, ax = plt.subplots(3, int(len(labels) / 2), figsize=figsize)
+
+    for i, ax in enumerate(ax.flat):
+        for j in range(dif_percentiles.shape[0]):
+            ax.fill_between(
+                X, upper_percentile[j, :, i], lower_percentile[j, :, i],
+                alpha=alphas[j], color='Blue', label='{}% confidence interval'.format(ci[j]))
+
+        ax.plot(X, media_tseries[:, i], color='Red', linewidth=0.1, label="posterior predictive median")
+
+        if X_test is not None:
+            ax.plot(X, X_test[:, i], linestyle='--', color='Black')
+
+        ax.set_title(labels[i])
+        ax.legend(loc=1, prop={'size': 7})
+
+        if i == 4:
+            break
+
+    plt.tight_layout()
+    if show:
+        plt.show()
+
+
