@@ -40,7 +40,7 @@ def prior(n_samples, prior_bounds, parameter_names):
     return params
 
 
-def version_prior(n_samples, version='v3', low_epsilon=None, up_epsilon=None, learning_noise=False):
+def version_prior(n_samples, version='v2', low_epsilon=None, up_epsilon=None, learning_noise=False):
     """
 
     :param n_samples: int
@@ -59,21 +59,21 @@ def version_prior(n_samples, version='v3', low_epsilon=None, up_epsilon=None, le
         params = prior(n_samples, prior_bounds=prior_bounds, parameter_names=parameter_names)
         return params
 
-    if version == 'v2':
+    if version == 'v1_1':
         parameter_names = ['beta', 'sigma', 'gamma', 'delta', 'eta']
         prior_bounds = np.array([[0.8, 0.25, 0.1, 0.01, 0.025], [2.25, 0.75, 1.0, 0.4, 0.45]])
 
         params = prior(n_samples, prior_bounds=prior_bounds, parameter_names=parameter_names)
         return params
 
-    if version == 'v3' or version == 'v4' or version == 'v6':
+    if version == 'v2' or version == 'v3' or version == 'v6':
         parameter_names = ['beta', 'sigma', 'gamma', 'mu_I']
         prior_bounds = np.array([[0.8, 0.075, 0.01, 0.025], [2.25, 0.25, 0.4, 0.45]])
 
         params = prior(n_samples, prior_bounds=prior_bounds, parameter_names=parameter_names)
         return params
 
-    if version == 'v5':
+    if version == 'v4':
         parameter_names = ['beta', 'sigma', 'gamma', 'mu_I', 'epsilon']
         if low_epsilon is not None and up_epsilon is not None:
             prior_bounds = np.array([[0.8, 0.075, 0.01, 0.025, low_epsilon], [2.25, 0.25, 0.4, 0.45, up_epsilon]])
@@ -88,7 +88,7 @@ def version_prior(n_samples, version='v3', low_epsilon=None, up_epsilon=None, le
             return params[:, :-1]
 
 
-def version_data_model(parameters, t, initial_values, version='v3', learning_noise=False):
+def version_data_model(parameters, t, initial_values, version='v2', learning_noise=False):
     """
     System of differential equations for SEIRD Model simulation
 
@@ -101,7 +101,7 @@ def version_data_model(parameters, t, initial_values, version='v3', learning_noi
     :param initial_values: ndarray of shape (5, )
         Initial values for SEIRD compartments
 
-    :param version: string, default='v3'
+    :param version: string, default='v2'
         Version of the bachelor thesis
 
     :return: ndarray of shape (tsteps, 5)
@@ -129,7 +129,7 @@ def version_data_model(parameters, t, initial_values, version='v3', learning_noi
             R.append(next_R)
             D.append(next_D)
 
-    if version == 'v2':
+    if version == 'v1_1':
         beta, sigma, gamma, delta, eta = parameters
         for _ in t[1:]:
             next_S = S[-1] - ((beta * S[-1] * I[-1]) / N) * dt
@@ -144,7 +144,7 @@ def version_data_model(parameters, t, initial_values, version='v3', learning_noi
             R.append(next_R)
             D.append(next_D)
 
-    if version == 'v3' or version == 'v4' or version == 'v5' or version == 'v6':
+    if version == 'v2' or version == 'v3' or version == 'v4' or version == 'v6':
         if learning_noise:
             beta, sigma, gamma, mu_I, epsilon = parameters
         else:
@@ -163,8 +163,29 @@ def version_data_model(parameters, t, initial_values, version='v3', learning_noi
             R.append(next_R)
             D.append(next_D)
 
+    if version == 'v7':
+        beta, sigma, gamma, xi, mu_I, mu_0, nu, beta_Q, sigma_Q, gamma_Q, mu_Q, theta_E, theta_I, psi_E, psi_I, q = parameters
+        for _ in t[1:]:
+            next_S = S[-1] - ((beta * S[-1] * I[-1] / N) - (q * beta_Q * S[-1] * Q_I[-1] / N) + xi * R[-1] + nu * N - mu_0 * S[-1]) * dt
+            next_E = E[-1] + ((beta * S[-1] * I[-1] / N) + (1 * beta_Q * S[-1] * Q_I[-1] / N) - sigma * E[-1] - theta_E * psi_E * E[-1] - mu_0 * E[-1]) * dt
+            next_I = I[-1] + (sigma * E[-1] - gamma * I[-1] - mu_I * I[-1] - theta_I * psi_I * I[-1] - mu_0 * I[-1]) * dt
+            next_Q_E = Q_E[-1] + (theta_E * psi_E * E[-1] - sigma_Q * Q_E[-1] - mu_0 * Q_E) * dt
+            next_Q_I = Q_I[-1] + (theta_I * psi_I * E[-1] + sigma_Q * Q_E[-1] - gamma_Q * Q_I - mu_Q * Q_I - mu_0 * Q_I) * dt
+            next_R = R[-1] + (gamma * I[-1] + gamma_Q * Q_I[-1] - xi * R[-1] - mu_0 * R[-1]) * dt
+            next_D = D[-1] + (mu_I * I[-1] + mu_Q * Q_I) * dt
 
-def data_generator(n_samples, T=100, dt=1, N=1000, version='v4', S=False, E=False, low_epsilon=None, up_epsilon=None, learning_noise=False, to_tensor=False):
+            S.append(next_S)
+            E.append(next_E)
+            I.append(next_I)
+            Q_E.append(next_Q_E)
+            Q_I.append(next_Q_I)
+            R.append(next_R)
+            D.append(next_D)
+
+    return np.stack([S, E, I, R, D]).T
+
+
+def data_generator(n_samples, T=100, dt=1, N=1000, version='v2', S=False, E=False, low_epsilon=None, up_epsilon=None, learning_noise=False, to_tensor=False):
     """
 
     :param n_samples: int
@@ -179,7 +200,7 @@ def data_generator(n_samples, T=100, dt=1, N=1000, version='v4', S=False, E=Fals
     :param N: int
         Total number of population
 
-    :param version: string, default='v3'
+    :param version: string, default='v2'
         Version type
 
     :param to_tensor: boolean, default=True
@@ -210,7 +231,7 @@ def data_generator(n_samples, T=100, dt=1, N=1000, version='v4', S=False, E=Fals
         learning_noise=learning_noise
     )
 
-    if version == 'v5':
+    if version == 'v4':
         noisy_X = X.copy()
 
         for i in range(noisy_X.shape[0]):
