@@ -112,10 +112,10 @@ def true_vs_estimated(model, X_test, params_test, n_samples, param_names,
 
     # Save if specified
     if filename is not None:
-        f.savefig("figures/{}_{}n_scatter.png".format(filename, X_test.shape[1]), dpi=600)
+        f.savefig("figures/{}.png".format(filename), dpi=600)
 
 
-def plot_parameters_correlation(parameters, parameter_names, figsize=(20, 10), show=True, font_size=11):
+def plot_parameters_correlation(parameters, parameter_names, figsize=(20, 10), show=True, filename=False, font_size=11):
     """
 
     :param parameters:
@@ -158,6 +158,10 @@ def plot_parameters_correlation(parameters, parameter_names, figsize=(20, 10), s
     if show:
         plt.figure(figsize=figsize)
         plt.show()
+
+    # Save if specified
+    if filename is not None:
+        fig.savefig("figures/{}.png".format(filename), dpi=600)
 
 
 def plot_tseries(tseries, labels, figsize=(15, 10), font_size=10, show=True):
