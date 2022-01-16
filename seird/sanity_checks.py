@@ -43,7 +43,7 @@ from seird.model import data_generator
 #             params = np.concatenate((params, extra_params))
 
 
-def sampling_sc(*args, version='v4'):
+def sampling_sc(*args, version='v4', learning_noise=False):
     """
     Ensures sampled means of the sampled posteriors for each time series obey boundaries prior distributions
 
@@ -55,18 +55,23 @@ def sampling_sc(*args, version='v4'):
         parameter_names = ['beta', 'sigma', 'gamma', 'delta', 'rho']
         lower_bound = [0.8, 0.45, 0.1, 0.01, 0.1]
         upper_bound = [2.25, 0.55, 1.0, 0.4, 0.6]
-    if version == 'v2':
+    if version == 'v1_1':
         parameter_names = ['beta', 'sigma', 'gamma', 'delta', 'eta']
         lower_bound = [0.8, 0.25, 0.1, 0.01, 0.025]
         upper_bound = [2.25, 0.75, 1.0, 0.4, 0.45]
-    if version == 'v3' or version == 'v4' or version == 'v6':
+    if version == 'v2' or version == 'v3' or version == 'v6':
         parameter_names = ['beta', 'sigma', 'gamma', 'mu_I']
         lower_bound = [0.8, 0.075, 0.01, 0.025]
         upper_bound = [2.25, 0.25, 0.4, 0.45]
-    if version == 'v5':
-        parameter_names = ['beta', 'sigma', 'gamma', 'mu_I', 'epsilon']
-        lower_bound = [0.8, 0.075, 0.01, 0.025, 0.05]
-        upper_bound = [2.25, 0.25, 0.4, 0.45, 0.15]
+    if version == 'v4':
+        if learning_noise:
+            parameter_names = ['beta', 'sigma', 'gamma', 'mu_I', 'epsilon']
+            lower_bound = [0.8, 0.075, 0.01, 0.025, 0.05]
+            upper_bound = [2.25, 0.25, 0.4, 0.45, 0.15]
+        else:
+            parameter_names = ['beta', 'sigma', 'gamma', 'mu_I']
+            lower_bound = [0.8, 0.075, 0.01, 0.025]
+            upper_bound = [2.25, 0.25, 0.4, 0.45]
 
         # if False:
         #     params_samples = args[0]
